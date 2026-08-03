@@ -1,4 +1,5 @@
 require("dotenv").config();
+process.env.TZ = "Asia/Ho_Chi_Minh"; // Cố định múi giờ Việt Nam cho Cloud Server
 
 // ============================================================
 // CẤU HÌNH
