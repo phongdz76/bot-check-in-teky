@@ -1,7 +1,8 @@
-const { API_BASE, TOKEN } = require("../config");
+import { API_BASE, TOKEN } from "../config/index.js";
+import { getTodayStr } from "../utils/time.js";
 
 /** Gọi API TutorO (có retry) */
-async function callApi(method, path, retries = 3) {
+export async function callApi(method, path, retries = 3) {
   const url = `${API_BASE}${path}`;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -41,8 +42,8 @@ async function callApi(method, path, retries = 3) {
 }
 
 /** Lấy danh sách lớp học hôm nay */
-async function getSessionsToday() {
-  const { getTodayStr } = require("../utils/time");
+export async function getSessionsToday() {
+
   const todayStr = getTodayStr();
   const path = `/class_sessions?from_date=${todayStr}&to_date=${todayStr}`;
   const json = await callApi("GET", path);
@@ -50,7 +51,7 @@ async function getSessionsToday() {
 }
 
 /** Kiểm tra trạng thái check-in của 1 buổi */
-async function getCheckinStatus(sessionId) {
+export async function getCheckinStatus(sessionId) {
   try {
     const res = await fetch(`${API_BASE}/class_sessions/${sessionId}/checkin`, {
       method: "GET",
@@ -66,8 +67,4 @@ async function getCheckinStatus(sessionId) {
   }
 }
 
-module.exports = {
-  callApi,
-  getSessionsToday,
-  getCheckinStatus,
-};
+

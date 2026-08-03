@@ -1,7 +1,7 @@
-const { CHECKIN_BEFORE_MINUTES, API_BASE, TOKEN } = require("../config");
-const { minutesToTimeStr, getTodayStr, getCurrentMinutes, sleep, formatDuration } = require("../utils/time");
-const { sendDiscord } = require("../services/discord");
-const { getSessionsToday, getCheckinStatus } = require("../services/tutoro");
+import { CHECKIN_BEFORE_MINUTES, API_BASE, TOKEN } from "../config/index.js";
+import { minutesToTimeStr, getTodayStr, getCurrentMinutes, sleep, formatDuration } from "../utils/time.js";
+import { sendDiscord } from "../services/discord.js";
+import { getSessionsToday, getCheckinStatus } from "../services/tutoro.js";
 
 /** Check-in 1 buổi học */
 async function checkinSession(session) {
@@ -132,7 +132,7 @@ async function waitAndCheckin(session) {
 }
 
 /** Xử lý check-in cho 1 ngày */
-async function processToday() {
+export async function processToday() {
   const now = new Date();
   const dayStr = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
 
@@ -243,6 +243,4 @@ async function processToday() {
   }]);
 }
 
-module.exports = {
-  processToday,
-};
+

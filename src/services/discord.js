@@ -1,7 +1,7 @@
-const { DISCORD_WEBHOOK } = require("../config");
+import { DISCORD_WEBHOOK } from "../config/index.js";
 
 /** Gửi thông báo Discord qua Webhook */
-async function sendDiscord(content, embeds = null) {
+export async function sendDiscord(content, embeds = null) {
   if (!DISCORD_WEBHOOK) return;
 
   const body = {};
@@ -19,4 +19,4 @@ async function sendDiscord(content, embeds = null) {
   }
 }
 
-module.exports = { sendDiscord };
+

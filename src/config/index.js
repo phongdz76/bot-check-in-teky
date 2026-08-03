@@ -1,4 +1,5 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 process.env.TZ = "Asia/Ho_Chi_Minh"; // Cố định múi giờ Việt Nam cho Cloud Server
 
 const API_BASE = "https://api.tutoro.vn/v1";
@@ -11,7 +12,7 @@ if (!TOKEN) {
   process.exit(1);
 }
 
-module.exports = {
+export {
   API_BASE,
   TOKEN,
   DISCORD_WEBHOOK,

@@ -1,12 +1,12 @@
 /** Chuyển phút từ 0:00 sang chuỗi "HH:MM" */
-function minutesToTimeStr(minutes) {
+export function minutesToTimeStr(minutes) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
 /** Lấy ngày hôm nay theo format DD-MM-YYYY */
-function getTodayStr() {
+export function getTodayStr() {
   const now = new Date();
   const dd = String(now.getDate()).padStart(2, "0");
   const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -15,18 +15,18 @@ function getTodayStr() {
 }
 
 /** Lấy số phút hiện tại kể từ 0:00 */
-function getCurrentMinutes() {
+export function getCurrentMinutes() {
   const now = new Date();
   return now.getHours() * 60 + now.getMinutes();
 }
 
 /** Sleep ms */
-function sleep(ms) {
+export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Tính số ms từ bây giờ đến 6:00 sáng hôm sau */
-function msUntilTomorrow6AM() {
+export function msUntilTomorrow6AM() {
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -35,7 +35,7 @@ function msUntilTomorrow6AM() {
 }
 
 /** Format ms thành chuỗi dễ đọc */
-function formatDuration(ms) {
+export function formatDuration(ms) {
   const totalMinutes = Math.floor(ms / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -43,11 +43,4 @@ function formatDuration(ms) {
   return `${minutes} phút`;
 }
 
-module.exports = {
-  minutesToTimeStr,
-  getTodayStr,
-  getCurrentMinutes,
-  sleep,
-  msUntilTomorrow6AM,
-  formatDuration,
-};
+

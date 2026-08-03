@@ -1,8 +1,8 @@
-require("./config"); // Khởi tạo config và timezone
-const { sendDiscord } = require("./services/discord");
-const { processToday } = require("./core/checkin");
-const { startServer } = require("./server");
-const { msUntilTomorrow6AM, formatDuration, sleep } = require("./utils/time");
+import "./config/index.js"; // Khởi tạo config và timezone
+import { sendDiscord } from "./services/discord.js";
+import { processToday } from "./core/checkin.js";
+import { startServer } from "./server.js";
+import { msUntilTomorrow6AM, formatDuration, sleep } from "./utils/time.js";
 
 async function main() {
   console.log("╔═══════════════════════════════════════════╗");

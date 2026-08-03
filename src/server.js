@@ -1,6 +1,6 @@
-const http = require("http");
+import http from "http";
 
-function startServer() {
+export function startServer() {
   const PORT = process.env.PORT || 3000;
 
   const server = http.createServer((req, res) => {
@@ -14,4 +14,4 @@ function startServer() {
   });
 }
 
-module.exports = { startServer };
+
