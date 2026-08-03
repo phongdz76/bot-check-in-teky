@@ -1,2 +1,4 @@
 node_modules/
 .env
+test_eval_output.txt
+test_eval.js

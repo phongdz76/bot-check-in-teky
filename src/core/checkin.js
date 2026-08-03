@@ -1,7 +1,9 @@
 import { CHECKIN_BEFORE_MINUTES, API_BASE, TOKEN } from "../config/index.js";
 import { minutesToTimeStr, getTodayStr, getCurrentMinutes, sleep, formatDuration } from "../utils/time.js";
 import { sendDiscord } from "../services/discord.js";
-import { getSessionsToday, getCheckinStatus } from "../services/tutoro.js";
+import { getSessionsToday, getCheckinStatus, getEvaluationStudents, submitEvaluation } from "../services/tutoro.js";
+import { getEvalMode } from "../server.js";
+import { EVAL_PAYLOAD_NORMAL, EVAL_PAYLOAD_HIGH } from "./evalData.js";
 
 /** Check-in 1 buổi học */
 async function checkinSession(session) {
@@ -101,6 +103,57 @@ async function checkinSession(session) {
   }
 }
 
+/** Tự động đánh giá học sinh của buổi học */
+async function evaluateSession(session) {
+  console.log(`   [DANH GIA] Bat dau tien trinh danh gia...`);
+  const mode = getEvalMode(session.session_id);
+  const payloadStr = mode === 2 ? JSON.stringify(EVAL_PAYLOAD_HIGH) : JSON.stringify(EVAL_PAYLOAD_NORMAL);
+  
+  const students = await getEvaluationStudents(session.session_id);
+  if (students.length === 0) {
+    console.log(`   [DANH GIA] Khong co danh sach hoc sinh de danh gia.`);
+    return;
+  }
+
+  let evalSuccess = 0;
+  let alreadyEval = 0;
+  let evalFail = 0;
+
+  for (const student of students) {
+    if (student.evaluation_info?.evaluation_status === true) {
+      alreadyEval++;
+      continue;
+    }
+
+    const payload = JSON.parse(payloadStr);
+    const success = await submitEvaluation(session.session_id, student.student_id, payload);
+    if (success) {
+      evalSuccess++;
+    } else {
+      evalFail++;
+    }
+    await sleep(2000); // Nghỉ 2s giữa các lần gửi để tránh spam API
+  }
+
+  const modeName = mode === 2 ? "Tích Cực" : "Bình Thường";
+  console.log(`   [DANH GIA] Xong! Thanh cong: ${evalSuccess}, Da DG truoc: ${alreadyEval}, Loi: ${evalFail} (Che do: ${modeName})`);
+
+  if (evalSuccess > 0 || evalFail > 0 || alreadyEval > 0) {
+    await sendDiscord(null, [{
+      title: "Đánh Giá Tự Động",
+      color: 0x9b59b6,
+      fields: [
+        { name: "Lop", value: session.class_name, inline: true },
+        { name: "Che do", value: modeName, inline: true },
+        { name: "Thanh cong", value: `${evalSuccess}`, inline: true },
+        { name: "Da DG truoc", value: `${alreadyEval}`, inline: true },
+        { name: "That bai", value: `${evalFail}`, inline: true },
+      ],
+      timestamp: new Date().toISOString(),
+    }]);
+  }
+}
+
 /** Chờ đến giờ check-in rồi check-in */
 async function waitAndCheckin(session) {
   const startTime = session.datetime.start_time;
@@ -110,16 +163,32 @@ async function waitAndCheckin(session) {
 
   const currentMinutes = getCurrentMinutes();
 
-  // Đã qua giờ học → vẫn thử check-in (API sẽ trả kết quả đúng)
+  // Lên lịch đánh giá vào cuối buổi học (dãn thêm 5 phút)
+  const scheduleEval = async () => {
+    const current = getCurrentMinutes();
+    const end = session.datetime.end_time + 5; // Trễ thêm 5 phút
+    if (current < end) {
+      const wait = end - current;
+      console.log(`   [INFO] Da len lich Đánh Giá tu dong vao luc ${minutesToTimeStr(end)} (sau ${wait} phut)`);
+      await sleep(wait * 60000);
+    }
+    await evaluateSession(session);
+  };
+
+  // Đã qua giờ bắt đầu → vẫn thử check-in
   if (currentMinutes > startTime) {
     console.log(`   [INFO] Da qua gio hoc (${startTimeStr}), thu check-in...`);
-    return await checkinSession(session);
+    const checkedIn = await checkinSession(session);
+    if (checkedIn) scheduleEval(); // Chạy ngầm
+    return checkedIn;
   }
 
   // Đang trong window check-in → check-in ngay
   if (currentMinutes >= checkinTime && currentMinutes <= startTime) {
     console.log(`   [INFO] Dang trong thoi gian check-in (${checkinTimeStr} - ${startTimeStr})`);
-    return await checkinSession(session);
+    const checkedIn = await checkinSession(session);
+    if (checkedIn) scheduleEval(); // Chạy ngầm
+    return checkedIn;
   }
 
   // Chưa đến giờ → chờ
@@ -128,7 +197,9 @@ async function waitAndCheckin(session) {
 
   await sleep(waitMinutes * 60000); // Đợi đến đúng phút
   console.log(`\n[CHECKIN] DA DEN GIO CHECK-IN!`);
-  return await checkinSession(session);
+  const checkedIn = await checkinSession(session);
+  if (checkedIn) scheduleEval(); // Chạy ngầm
+  return checkedIn;
 }
 
 /** Xử lý check-in cho 1 ngày */
