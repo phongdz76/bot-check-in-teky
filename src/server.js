@@ -37,8 +37,13 @@ export function startServer() {
       return;
     }
 
-    // Giao diện Web Dashboard
-    if (req.method === "GET" && req.url === "/") {
+    // Giao diện Web Dashboard (Hỗ trợ cả GET và HEAD cho UptimeRobot)
+    if ((req.method === "GET" || req.method === "HEAD") && req.url === "/") {
+      if (req.method === "HEAD") {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
       try {
         const sessions = await getSessionsToday();
         
