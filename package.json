@@ -2,9 +2,9 @@
   "name": "checkin-tutoro",
   "version": "1.0.0",
   "description": "Tự động check-in TutorO đúng giờ",
-  "main": "checkin.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node checkin.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
