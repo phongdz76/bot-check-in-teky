@@ -138,7 +138,7 @@ export function startServer() {
     res.end("Không tìm thấy trang");
   });
 
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Web Dashboard dang chay tren port ${PORT}`);
     console.log(`Truy cap link Render cua ban de vao Bang dieu khien`);
   });
