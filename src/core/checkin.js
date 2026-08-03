@@ -152,6 +152,8 @@ async function evaluateSession(session) {
       timestamp: new Date().toISOString(),
     }]);
   }
+  
+  return { success: evalSuccess, already: alreadyEval, fail: evalFail };
 }
 
 /** Chờ đến giờ check-in rồi check-in */
@@ -169,26 +171,24 @@ async function waitAndCheckin(session) {
     const end = session.datetime.end_time + 5; // Trễ thêm 5 phút
     if (current < end) {
       const wait = end - current;
-      console.log(`   [INFO] Da len lich Đánh Giá tu dong vao luc ${minutesToTimeStr(end)} (sau ${wait} phut)`);
+      console.log(`   [INFO] Da len lich Đánh Giá tu dong vao luc ${minutesToTimeStr(end)} (sau ${wait} phut) cho lop ${session.class_name}`);
       await sleep(wait * 60000);
     }
-    await evaluateSession(session);
+    return await evaluateSession(session);
   };
 
   // Đã qua giờ bắt đầu → vẫn thử check-in
   if (currentMinutes > startTime) {
     console.log(`   [INFO] Da qua gio hoc (${startTimeStr}), thu check-in...`);
     const checkedIn = await checkinSession(session);
-    if (checkedIn) scheduleEval(); // Chạy ngầm
-    return checkedIn;
+    return { checkedIn, evalPromise: checkedIn ? scheduleEval() : null };
   }
 
   // Đang trong window check-in → check-in ngay
   if (currentMinutes >= checkinTime && currentMinutes <= startTime) {
     console.log(`   [INFO] Dang trong thoi gian check-in (${checkinTimeStr} - ${startTimeStr})`);
     const checkedIn = await checkinSession(session);
-    if (checkedIn) scheduleEval(); // Chạy ngầm
-    return checkedIn;
+    return { checkedIn, evalPromise: checkedIn ? scheduleEval() : null };
   }
 
   // Chưa đến giờ → chờ
@@ -198,8 +198,7 @@ async function waitAndCheckin(session) {
   await sleep(waitMinutes * 60000); // Đợi đến đúng phút
   console.log(`\n[CHECKIN] DA DEN GIO CHECK-IN!`);
   const checkedIn = await checkinSession(session);
-  if (checkedIn) scheduleEval(); // Chạy ngầm
-  return checkedIn;
+  return { checkedIn, evalPromise: checkedIn ? scheduleEval() : null };
 }
 
 /** Xử lý check-in cho 1 ngày */
@@ -265,15 +264,18 @@ export async function processToday() {
   let success = 0;
   let skipped = 0;
   let failed = 0;
+  const evalPromises = [];
 
   for (const session of sessions) {
     console.log("───────────────────────────────────────────");
     const startStr = minutesToTimeStr(session.datetime.start_time);
     console.log(`[XU LY] ${session.class_name} (${startStr})`);
 
-    const result = await waitAndCheckin(session);
-    if (result === true) success++;
-    else if (result === false) {
+    const { checkedIn, evalPromise } = await waitAndCheckin(session);
+    if (checkedIn === true) {
+      success++;
+      if (evalPromise) evalPromises.push(evalPromise);
+    } else if (checkedIn === false) {
       const currentMinutes = getCurrentMinutes();
       if (currentMinutes > session.datetime.start_time) {
         skipped++;
@@ -299,19 +301,56 @@ export async function processToday() {
     );
   }
 
-  // Gửi tổng kết lên Discord
+  // Gửi tổng kết check-in lên Discord
   const summaryDayStr = getTodayStr();
   await sendDiscord(null, [{
-    title: `Tong ket check-in — ${summaryDayStr}`,
+    title: `Tổng Kết Check-in — ${summaryDayStr}`,
     color: success > 0 ? 0x00d26a : (failed > 0 ? 0xff4757 : 0xffa502),
     fields: [
-      { name: "Thanh cong", value: `${success}`, inline: true },
-      { name: "Bo qua", value: `${skipped}`, inline: true },
-      { name: "That bai", value: `${failed}`, inline: true },
-      { name: "Tong buoi", value: `${sessions.length}`, inline: true },
+      { name: "Thành công", value: `${success}`, inline: true },
+      { name: "Bỏ qua", value: `${skipped}`, inline: true },
+      { name: "Thất bại", value: `${failed}`, inline: true },
+      { name: "Tổng buổi", value: `${sessions.length}`, inline: true },
     ],
     timestamp: new Date().toISOString(),
   }]);
+
+  // Chờ tất cả tiến trình đánh giá hoàn tất để tổng kết
+  if (evalPromises.length > 0) {
+    console.log("\n[INFO] Dang cho cac lop hoc ket thuc de hoan tat Danh Gia...");
+    const evalResults = await Promise.all(evalPromises);
+    
+    let totalEvalSuccess = 0;
+    let totalAlreadyEval = 0;
+    let totalEvalFail = 0;
+
+    for (const res of evalResults) {
+      if (res) {
+        totalEvalSuccess += res.success;
+        totalAlreadyEval += res.already;
+        totalEvalFail += res.fail;
+      }
+    }
+
+    console.log("\n═══════════════════════════════════════════");
+    console.log("   TONG KET DANH GIA TRONG NGAY");
+    console.log("═══════════════════════════════════════════");
+    console.log(`   Đã đánh giá thành công: ${totalEvalSuccess}`);
+    console.log(`   Đã được đánh giá trước: ${totalAlreadyEval}`);
+    console.log(`   Lỗi/Thất bại: ${totalEvalFail}`);
+    console.log("═══════════════════════════════════════════");
+
+    await sendDiscord(null, [{
+      title: `Tổng Kết Đánh Giá — ${summaryDayStr}`,
+      color: 0x9b59b6,
+      fields: [
+        { name: "Thành công", value: `${totalEvalSuccess}`, inline: true },
+        { name: "Đã đánh giá trước", value: `${totalAlreadyEval}`, inline: true },
+        { name: "Thất bại", value: `${totalEvalFail}`, inline: true },
+      ],
+      timestamp: new Date().toISOString(),
+    }]);
+  }
 }
 
 
