@@ -1,0 +1,12 @@
+{
+  "name": "checkin-tutoro",
+  "version": "1.0.0",
+  "description": "Tự động check-in TutorO đúng giờ",
+  "main": "checkin.js",
+  "scripts": {
+    "start": "node checkin.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

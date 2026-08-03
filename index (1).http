@@ -1,0 +1,232 @@
+
+const token = "9cf1371594f3088f591524f168832ab5a5250a75"
+
+
+GET https://api.tutoro.vn/v1/class_sessions?from_date=03-08-2026&to_date=03-08-2026
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+https://api.tutoro.vn/v1/class_sessions/19859992
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+
+
+https://api.tutoro.vn/v1/class_sessions/19859992/checkin
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+
+
+GET https://api.tutoro.vn/v1/class_sessions?from_date=19-04-2026&to_date=19-04-2026
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+GET https://api.tutoro.vn/v1/class_sessions?from_date=2026-04-25&to_date=2026-04-25
+
+https://api.tutoro.vn/v1/class_sessions/18966632
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+https://api.tutoro.vn/v1/class_sessions/19100440/checkin
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+https://api.tutoro.vn/v1/class_sessions/19100440
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+https://api.tutoro.vn/v1/class_sessions/18966631/attendances?language_code=vi
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST https://api.tutoro.vn/v1/class_sessions/19091156/attendances/31272?attending_types=YES
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+GET https://api.tutoro.vn/v1/class_sessions/19542484/evaluations
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST https://api.tutoro.vn/v1/user/login_pass
+Content-Type: application/json
+
+{
+  "mobile_number": "+84931429277",
+  "password": "Gtubj#8I",
+  "device_id": "784c3a7b4fcf82b4",
+  "firebase_token": "dyn0EuOATmqdSvoceLhT5dK1cQi8xap0BGIigbFEtgf_IXGZbTWCgRFNfo2y8kMkjzDMZMwJjnkTfMvEvVzgvoL_WjB7hjSuXQwUSyrfN7I"
+}
+
+GET https://api.tutoro.vn/v1/class_sessions/19740364/evaluation_information/15588
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST https://api.tutoro.vn/v1/class_sessions/19542484/evaluations/23204
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+Content-Type: application/json
+
+
+POST http://localhost:3000/class-sessions/19542484/evaluations/23204
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+Content-Type: application/json
+
+{
+  "id": 11,
+  "name": "TEKY - Đánh giá cuối buổi",
+  "evaluated_criterias": [
+    {
+      "id": 123,
+      "name": "Mức độ tập trung trong giờ học",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn thỉnh thoảng bị mất tập trung tại một số thời điểm trong bài học",
+      "point": 2
+    },
+    {
+      "id": 178,
+      "name": "Ý tưởng dự án/sản phẩm",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Dự án có sự mở rộng về chủ đề/vấn đề của bài học. Dự án hoàn toàn không sử dụng ý tưởng từ dự án khác. Thể hiện được tính cá nhân hóa.",
+      "point": 4
+    },
+    {
+      "id": 130,
+      "name": "Tư duy phản biện (Critical Thinking)",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn còn rụt rè trong việc đưa ra quan điểm cá nhân",
+      "point": 1
+    },
+    {
+      "id": 131,
+      "name": "Hợp tác nhóm (Collaboration)",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn nỗ lực hoàn thành nhiệm vụ được giao, hướng tới đạt mục tiêu của nhóm",
+      "point": 3
+    },
+    {
+      "id": 132,
+      "name": "Chia sẻ ý tưởng (Communication)",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn trình bày được ý tưởng, nhưng chưa trôi chảy",
+      "point": 2
+    },
+    {
+      "id": 124,
+      "name": "Mức độ tương tác trong giờ học",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn tích cực tham gia các hoạt động trong lớp, đôi lúc còn đề xuất các hoạt động trò chơi cho cả lớp",
+      "point": 4
+    },
+    {
+      "id": 126,
+      "name": "Đi muộn/trễ",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn đi học đúng giờ ",
+      "point": 3
+    },
+    {
+      "id": 127,
+      "name": "Bài tập về nhà",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn đã thực hiện bài tập, độ chính xác từ 50% đến 80%",
+      "point": 3
+    },
+    {
+      "id": 128,
+      "name": "Kiến thức cũ",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn nhớ được hầu hết kiến thức cũ, đôi khi còn quên một số nội dung và cần giáo viên nhắc lại",
+      "point": 2
+    },
+    {
+      "id": 129,
+      "name": "Kiến thức mới",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn tiếp thu kiến thức tốt. Hoàn thành 100% các nhiệm vụ bài học",
+      "point": 3
+    },
+    {
+      "id": 181,
+      "name": "Tính hoàn thiện",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Dự án có thông tin giới thiệu cơ bản",
+      "point": 2
+    },
+    {
+      "id": 133,
+      "name": "Sáng tạo (Creativity)",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn tự tin phát triển ý tưởng cá nhân, dám thử nghiệm, thực hiện các phương án khác nhau để giải quyết vấn đề",
+      "point": 4
+    },
+    {
+      "id": 179,
+      "name": "Thiết kế",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Dự án được thiết kế theo hướng cá nhân hóa. Các tài nguyên được sử dụng nhất quán, hài hòa.",
+      "point": 4
+    },
+    {
+      "id": 180,
+      "name": "Kiến thức",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Dự án sử dụng các kiến thức nâng cao. Dự án hoạt động bình thường, không có các câu lệnh thừa. Dự án có tính thẩm mỹ tốt, đạt hơn 70% kiến thức bài học. Dự án có sự mở rộng về tính năng hoạt động",
+      "point": 4
+    },
+    {
+      "id": 125,
+      "name": "Thái độ giao tiếp trong lớp học",
+      "type": "SINGLE_CHOICE",
+      "sequence": "1",
+      "answer": "Bạn đã tự tin trong giao tiếp và tương tác với thầy cô, bạn bè",
+      "point": 3
+    }
+  ]
+}
+
+GET https://api.tutoro.vn/v1/classes/registered_classes
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST https://api.tutoro.vn/v1/class_sessions/19100448/total_student
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+Content-Type: application/json
+
+{
+  "total_students": 35
+}
+
+POST https://api.tutoro.vn/v1/class_sessions/19701364/checkin
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+GET https://api.tutoro.vn/v1/class_sessions/19230569/checkin
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST http://localhost:3000/checkin-auto
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+
+POST http://localhost:3000/class-sessions/19100448/set-total-students
+Authorization: Bearer 9cf1371594f3088f591524f168832ab5a5250a75
+Content-Type: application/json
+
+{
+  "total_students": 33
+}
+
+POST http://localhost:3000/class-sessions/19100448/checkin
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0dXRvcm9Ub2tlbiI6IjRjMWRlYmE2MzY2MDFkYTk4MzQ2ZWU1NzlkZjU5MDI2NDE0MDA5NDQiLCJpYXQiOjE3NzcyMzE0NTksImV4cCI6MTc3OTgyMzQ1OX0.2n7ztYuOyH-cR9GJ7Thg8J_XjH7EheB2ikM3Mk8FIZc
+
+POST http://localhost:8888/api/login
+Content-Type: application/json
+
+{
+  "mobile_number": "+84387432331",
+  "password": "1ii^qUwd"
+}
+
+GET https://api.tutoro.vn/v1/profile
+Authorization: Bearer 33b1223fce8045759ee07d0997c1d6f3c5a65b03
+
+GET https://api.tutoro.vn/v1/class_sessions/19091156/attendances?language_code=vi
+Authorization: Bearer 33b1223fce8045759ee07d0997c1d6f3c5a65b03
