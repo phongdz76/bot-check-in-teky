@@ -301,20 +301,6 @@ export async function processToday() {
     );
   }
 
-  // Gửi tổng kết check-in lên Discord
-  const summaryDayStr = getTodayStr();
-  await sendDiscord(null, [{
-    title: `Tổng Kết Check-in — ${summaryDayStr}`,
-    color: success > 0 ? 0x00d26a : (failed > 0 ? 0xff4757 : 0xffa502),
-    fields: [
-      { name: "Thành công", value: `${success}`, inline: true },
-      { name: "Bỏ qua", value: `${skipped}`, inline: true },
-      { name: "Thất bại", value: `${failed}`, inline: true },
-      { name: "Tổng buổi", value: `${sessions.length}`, inline: true },
-    ],
-    timestamp: new Date().toISOString(),
-  }]);
-
   // Chờ tất cả tiến trình đánh giá hoàn tất để tổng kết
   if (evalPromises.length > 0) {
     console.log("\n[INFO] Dang cho cac lop hoc ket thuc de hoan tat Danh Gia...");
@@ -332,6 +318,20 @@ export async function processToday() {
       }
     }
 
+    // Gửi tổng kết check-in lên Discord
+    const summaryDayStr = getTodayStr();
+    await sendDiscord(null, [{
+      title: `Tổng Kết Check-in — ${summaryDayStr}`,
+      color: success > 0 ? 0x00d26a : (failed > 0 ? 0xff4757 : 0xffa502),
+      fields: [
+        { name: "Thành công", value: `${success}`, inline: true },
+        { name: "Bỏ qua", value: `${skipped}`, inline: true },
+        { name: "Thất bại", value: `${failed}`, inline: true },
+        { name: "Tổng buổi", value: `${sessions.length}`, inline: true },
+      ],
+      timestamp: new Date().toISOString(),
+    }]);
+
     console.log("\n═══════════════════════════════════════════");
     console.log("   TONG KET DANH GIA TRONG NGAY");
     console.log("═══════════════════════════════════════════");
@@ -347,6 +347,20 @@ export async function processToday() {
         { name: "Thành công", value: `${totalEvalSuccess}`, inline: true },
         { name: "Đã đánh giá trước", value: `${totalAlreadyEval}`, inline: true },
         { name: "Thất bại", value: `${totalEvalFail}`, inline: true },
+      ],
+      timestamp: new Date().toISOString(),
+    }]);
+  } else {
+    // Nếu không có lớp nào cần đánh giá, vẫn gửi tổng kết check-in
+    const summaryDayStr = getTodayStr();
+    await sendDiscord(null, [{
+      title: `Tổng Kết Check-in — ${summaryDayStr}`,
+      color: success > 0 ? 0x00d26a : (failed > 0 ? 0xff4757 : 0xffa502),
+      fields: [
+        { name: "Thành công", value: `${success}`, inline: true },
+        { name: "Bỏ qua", value: `${skipped}`, inline: true },
+        { name: "Thất bại", value: `${failed}`, inline: true },
+        { name: "Tổng buổi", value: `${sessions.length}`, inline: true },
       ],
       timestamp: new Date().toISOString(),
     }]);
