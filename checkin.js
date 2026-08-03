@@ -318,6 +318,12 @@ async function processToday() {
 
   if (sessions.length === 0) {
     console.log("[INFO] Hom nay khong co buoi hoc nao.");
+    await sendDiscord(null, [{
+      title: `📅 Lich hoc hom nay (${dayStr})`,
+      description: "Hôm nay bạn không có lịch dạy nào, nghỉ ngơi thôi! 🎮",
+      color: 0x95a5a6,
+      timestamp: new Date().toISOString(),
+    }]);
     return;
   }
 
@@ -325,6 +331,8 @@ async function processToday() {
   sessions.sort((a, b) => a.datetime.start_time - b.datetime.start_time);
 
   console.log(`[INFO] Tim thay ${sessions.length} buoi hoc:\n`);
+
+  const scheduleFields = [];
 
   sessions.forEach((s, i) => {
     const startStr = minutesToTimeStr(s.datetime.start_time);
@@ -338,7 +346,23 @@ async function processToday() {
     console.log(`      Check-in luc: ${checkinStr}`);
     console.log(`      Hoc sinh: ${s.students_number}`);
     console.log();
+
+    scheduleFields.push({
+      name: `${i + 1}. ${s.class_name}`,
+      value: `⏰ **Giờ học:** ${startStr} - ${endStr}\n⏳ **Sẽ tự check-in lúc:** ${checkinStr}\n📖 **Bài:** ${s.session_chapter}`,
+      inline: false
+    });
   });
+
+  // Báo lịch lên Discord
+  await sendDiscord(null, [{
+    title: `📅 Lich hoc hom nay (${dayStr})`,
+    description: `Bot đã quét và tìm thấy **${sessions.length}** buổi học. Bot sẽ tự động check-in đúng giờ cho bạn! 🚀`,
+    color: 0xf1c40f, // Màu vàng
+    fields: scheduleFields,
+    timestamp: new Date().toISOString(),
+  }]);
+
 
   // Xử lý từng buổi tuần tự (theo thứ tự thời gian)
   let success = 0;
