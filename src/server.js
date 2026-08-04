@@ -128,7 +128,7 @@ export function startServer() {
                   <button class="btn ${mode === 2 ? 'active' : ''}" onclick="setMode('${s.session_id}', 2)">Tích cực</button>
                   <button class="btn btn-skip ${mode === 0 ? 'active' : ''}" onclick="setMode('${s.session_id}', 0)">Không đánh giá</button>
                 </div>
-                <button class="btn btn-eval" onclick="evaluateNow('${s.session_id}')">⚡ Đánh giá ngay</button>
+                <button class="btn btn-eval" onclick="evaluateNow('${s.session_id}')">Đánh giá ngay</button>
               </div>
             `;
           });
