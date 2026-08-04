@@ -344,12 +344,16 @@ export async function processToday() {
     let totalEvalSuccess = 0;
     let totalAlreadyEval = 0;
     let totalEvalFail = 0;
+    let totalSkippedClass = 0;
+    let totalSkippedAbsent = 0;
 
     for (const res of evalResults) {
       if (res) {
         totalEvalSuccess += res.success;
         totalAlreadyEval += res.already;
         totalEvalFail += res.fail;
+        if (res.skippedCamp) totalSkippedClass++;
+        totalSkippedAbsent += (res.skippedAbsent || 0);
       }
     }
 
@@ -372,6 +376,8 @@ export async function processToday() {
     console.log("═══════════════════════════════════════════");
     console.log(`   Đã đánh giá thành công: ${totalEvalSuccess}`);
     console.log(`   Đã được đánh giá trước: ${totalAlreadyEval}`);
+    console.log(`   Học sinh nghỉ học (bỏ qua): ${totalSkippedAbsent}`);
+    console.log(`   Lớp không đánh giá (Camp/Tắt): ${totalSkippedClass}`);
     console.log(`   Lỗi/Thất bại: ${totalEvalFail}`);
     console.log("═══════════════════════════════════════════");
 
@@ -381,6 +387,8 @@ export async function processToday() {
       fields: [
         { name: "Thành công", value: `${totalEvalSuccess}`, inline: true },
         { name: "Đã đánh giá trước", value: `${totalAlreadyEval}`, inline: true },
+        { name: "HS nghỉ học", value: `${totalSkippedAbsent}`, inline: true },
+        { name: "Lớp không ĐG", value: `${totalSkippedClass}`, inline: true },
         { name: "Thất bại", value: `${totalEvalFail}`, inline: true },
       ],
       timestamp: new Date().toISOString(),
