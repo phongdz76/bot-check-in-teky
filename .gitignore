@@ -3,3 +3,5 @@ node_modules/
 test_eval_output.txt
 test_eval.js
 index (1).http
+check_student_data.js
+push_error.txt

@@ -1,7 +1,7 @@
 import { CHECKIN_BEFORE_MINUTES, API_BASE, TOKEN } from "../config/index.js";
 import { minutesToTimeStr, getTodayStr, getCurrentMinutes, sleep, formatDuration } from "../utils/time.js";
 import { sendDiscord } from "../services/discord.js";
-import { getSessionsToday, getCheckinStatus, getEvaluationStudents, submitEvaluation } from "../services/tutoro.js";
+import { getSessionsToday, getCheckinStatus, getEvaluationStudents, submitEvaluation, getAbsentStudentIds } from "../services/tutoro.js";
 import { getEvalMode } from "../server.js";
 import { EVAL_PAYLOAD_NORMAL, EVAL_PAYLOAD_HIGH } from "./evalData.js";
 
@@ -103,10 +103,29 @@ async function checkinSession(session) {
   }
 }
 
+/** Kiểm tra xem lớp có phải loại "camp" không (không cần đánh giá) */
+function isCampClass(session) {
+  const name = (session.class_name || "").toLowerCase();
+  return name.includes("camp");
+}
+
 /** Tự động đánh giá học sinh của buổi học */
 async function evaluateSession(session) {
-  console.log(`   [DANH GIA] Bat dau tien trinh danh gia...`);
   const mode = getEvalMode(session.session_id);
+
+  // Mode 0 = Không đánh giá (do người dùng chọn trên Dashboard)
+  if (mode === 0) {
+    console.log(`   [DANH GIA] Lop "${session.class_name}" duoc dat "Khong danh gia" → Bo qua.`);
+    return { success: 0, already: 0, fail: 0, skippedAbsent: 0, skippedCamp: true };
+  }
+
+  // Bỏ qua lớp Camp - không cần đánh giá
+  if (isCampClass(session)) {
+    console.log(`   [DANH GIA] Lop "${session.class_name}" la lop Camp → Bo qua danh gia.`);
+    return { success: 0, already: 0, fail: 0, skippedAbsent: 0, skippedCamp: true };
+  }
+
+  console.log(`   [DANH GIA] Bat dau tien trinh danh gia...`);
   const payloadStr = mode === 2 ? JSON.stringify(EVAL_PAYLOAD_HIGH) : JSON.stringify(EVAL_PAYLOAD_NORMAL);
   
   const students = await getEvaluationStudents(session.session_id);
@@ -115,13 +134,28 @@ async function evaluateSession(session) {
     return;
   }
 
+  // Lấy danh sách ID học sinh nghỉ học từ API attendances
+  const absentIds = await getAbsentStudentIds(session.session_id);
+  if (absentIds.size > 0) {
+    console.log(`   [DANH GIA] Co ${absentIds.size} hoc sinh nghi hoc.`);
+  }
+
   let evalSuccess = 0;
   let alreadyEval = 0;
   let evalFail = 0;
+  let skippedAbsent = 0;
 
   for (const student of students) {
+    // Bỏ qua học sinh đã được đánh giá trước đó
     if (student.evaluation_info?.evaluation_status === true) {
       alreadyEval++;
+      continue;
+    }
+
+    // Bỏ qua học sinh nghỉ học (vắng mặt)
+    if (absentIds.has(student.student_id)) {
+      console.log(`   [DANH GIA] HS "${student.full_name || student.student_id}" nghi hoc → Bo qua.`);
+      skippedAbsent++;
       continue;
     }
 
@@ -136,9 +170,9 @@ async function evaluateSession(session) {
   }
 
   const modeName = mode === 2 ? "Tích Cực" : "Bình Thường";
-  console.log(`   [DANH GIA] Xong! Thanh cong: ${evalSuccess}, Da DG truoc: ${alreadyEval}, Loi: ${evalFail} (Che do: ${modeName})`);
+  console.log(`   [DANH GIA] Xong! Thanh cong: ${evalSuccess}, Da DG truoc: ${alreadyEval}, Nghi hoc: ${skippedAbsent}, Loi: ${evalFail} (Che do: ${modeName})`);
 
-  if (evalSuccess > 0 || evalFail > 0 || alreadyEval > 0) {
+  if (evalSuccess > 0 || evalFail > 0 || alreadyEval > 0 || skippedAbsent > 0) {
     await sendDiscord(null, [{
       title: "Đánh Giá Tự Động",
       color: 0x9b59b6,
@@ -147,13 +181,14 @@ async function evaluateSession(session) {
         { name: "Che do", value: modeName, inline: true },
         { name: "Thanh cong", value: `${evalSuccess}`, inline: true },
         { name: "Da DG truoc", value: `${alreadyEval}`, inline: true },
+        { name: "Nghi hoc (bo qua)", value: `${skippedAbsent}`, inline: true },
         { name: "That bai", value: `${evalFail}`, inline: true },
       ],
       timestamp: new Date().toISOString(),
     }]);
   }
   
-  return { success: evalSuccess, already: alreadyEval, fail: evalFail };
+  return { success: evalSuccess, already: alreadyEval, fail: evalFail, skippedAbsent, skippedCamp: false };
 }
 
 /** Chờ đến giờ check-in rồi check-in */

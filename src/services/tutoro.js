@@ -150,3 +150,24 @@ export async function submitEvaluation(sessionId, studentId, payload) {
     return false;
   }
 }
+
+/** Lấy danh sách ID học sinh nghỉ học (attendance_status !== "YES") */
+export async function getAbsentStudentIds(sessionId) {
+  try {
+    const json = await callApi("GET", `/class_sessions/${sessionId}/attendances?language_code=vi`);
+    const absentIds = new Set();
+    const centers = json.data?.list_students || [];
+    for (const center of centers) {
+      for (const student of (center.list_students || [])) {
+        if (student.attendance_status !== "YES") {
+          absentIds.add(student.student_id);
+        }
+      }
+    }
+    return absentIds;
+  } catch (err) {
+    console.error(`[API] Loi lay danh sach diem danh:`, err.message);
+    return new Set(); // Nếu lỗi, trả về rỗng (không bỏ qua ai)
+  }
+}
+
