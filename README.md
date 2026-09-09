@@ -1,4 +1,4 @@
-# TutorO Auto Check-in Bot 🚀
+# TutorO Auto Check-in Bot 
 
 Bot tự động điểm danh, tự động đánh giá học sinh cho giáo viên Teky trên nền tảng TutorO, chạy hoàn toàn tự động 24/7 và thông báo kết quả qua Discord. Đặc biệt, Bot đi kèm với một **Web Dashboard** giúp bạn tùy chỉnh chế độ đánh giá cho từng lớp bằng điện thoại một cách tiện lợi.
 
@@ -66,4 +66,4 @@ Do Render bản miễn phí sẽ tự động tắt máy chủ nếu không có 
    - **Monitoring Interval**: 5 minutes
 4. Bấm **Create Monitor**. 
 
-Hoàn tất! Cột mốc trạng thái màu xanh lá cây báo hiệu Bot của bạn đã chính thức bước vào trạng thái bất tử 24/7. Chúc bạn có những giờ dạy học thảnh thơi! 🎉
+Hoàn tất! Cột mốc trạng thái màu xanh lá cây báo hiệu Bot của bạn đã chính thức bước vào trạng thái bất tử 24/7. Chúc bạn có những giờ dạy học thảnh thơi! 
