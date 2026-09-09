@@ -111,9 +111,12 @@ export function startServer() {
           sessionCards = `<div class="card"><p>Hôm nay không có ca dạy nào!</p></div>`;
         } else {
           sessions.forEach(s => {
+            const nameLower = (s.class_name || "").toLowerCase();
             // Lớp Camp tự động đặt mode = 0 nếu chưa được set
-            const isCamp = (s.class_name || "").toLowerCase().includes("camp");
-            if (isCamp && !evalModes.has(String(s.session_id))) {
+            const isCamp = nameLower.includes("camp");
+            // Lớp STEM tiểu học/THCS tự động đặt mode = 0 nếu chưa được set
+            const isStemSchool = nameLower.includes("stem") && (nameLower.includes("tiểu học") || nameLower.includes("thcs") || nameLower.includes("trung học"));
+            if ((isCamp || isStemSchool) && !evalModes.has(String(s.session_id))) {
               evalModes.set(String(s.session_id), 0);
             }
             const mode = getEvalMode(s.session_id);

@@ -109,6 +109,12 @@ function isCampClass(session) {
   return name.includes("camp");
 }
 
+/** Kiểm tra xem lớp có phải STEM tiểu học hoặc THCS không (không cần đánh giá) */
+function isStemPrimaryOrSecondary(session) {
+  const name = (session.class_name || "").toLowerCase();
+  return name.includes("stem") && (name.includes("tiểu học") || name.includes("thcs") || name.includes("trung học"));
+}
+
 /** Tự động đánh giá học sinh của buổi học */
 async function evaluateSession(session) {
   const mode = getEvalMode(session.session_id);
@@ -122,6 +128,12 @@ async function evaluateSession(session) {
   // Bỏ qua lớp Camp - không cần đánh giá
   if (isCampClass(session)) {
     console.log(`   [DANH GIA] Lop "${session.class_name}" la lop Camp → Bo qua danh gia.`);
+    return { success: 0, already: 0, fail: 0, skippedAbsent: 0, skippedCamp: true };
+  }
+
+  // Bỏ qua lớp STEM tiểu học / THCS - không cần đánh giá
+  if (isStemPrimaryOrSecondary(session)) {
+    console.log(`   [DANH GIA] Lop "${session.class_name}" la lop STEM Tieu hoc/THCS → Bo qua danh gia.`);
     return { success: 0, already: 0, fail: 0, skippedAbsent: 0, skippedCamp: true };
   }
 
