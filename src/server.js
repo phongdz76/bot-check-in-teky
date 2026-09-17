@@ -16,6 +16,13 @@ export function startServer() {
   const PORT = process.env.PORT || 3000;
 
   const server = http.createServer(async (req, res) => {
+    // Health check endpoint — trả về 200 ngay lập tức, không gọi API nào
+    if (req.url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok", uptime: process.uptime() }));
+      return;
+    }
+
     // API Cập nhật chế độ đánh giá
     if (req.method === "POST" && req.url === "/api/set-mode") {
       let body = "";
