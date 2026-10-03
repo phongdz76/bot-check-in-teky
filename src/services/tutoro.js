@@ -113,6 +113,57 @@ export async function getSessionsToday() {
   return json.data?.list_sessions || [];
 }
 
+/** Lấy danh sách lớp học cả tuần (Thứ 2 - Chủ nhật) */
+export async function getSessionsWeek() {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=CN, 1=T2, ...
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const fmtDisplay = (d) => {
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const datesToFetch = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    datesToFetch.push(fmtDisplay(d));
+  }
+
+  let allSessions = [];
+  // Gửi song song 7 request cho 7 ngày để tránh bị limit 20 items/page của API
+  const promises = datesToFetch.map(async (dateStr) => {
+    try {
+      const path = `/class_sessions?from_date=${dateStr}&to_date=${dateStr}`;
+      const json = await callApi("GET", path);
+      return json.data?.list_sessions || [];
+    } catch (e) {
+      console.error(`Lỗi lấy lịch tuần ngày ${dateStr}:`, e.message);
+      return [];
+    }
+  });
+
+  const results = await Promise.all(promises);
+  results.forEach(dailySessions => {
+    allSessions = allSessions.concat(dailySessions);
+  });
+
+  return {
+    sessions: allSessions,
+    monday: fmtDisplay(monday),
+    sunday: fmtDisplay(sunday),
+  };
+}
+
 /** Kiểm tra trạng thái check-in của 1 buổi */
 export async function getCheckinStatus(sessionId) {
   try {
