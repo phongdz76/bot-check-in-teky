@@ -64,8 +64,10 @@ async function checkinSession(session) {
       return true;
     }
 
+    const msgText = (json.message?.text || "").toLowerCase();
+
     // Đã check-in trước đó
-    if (json.message?.text?.includes("đã check in")) {
+    if (msgText.includes("đã check in")) {
       console.log(`   [INFO] Da check-in truoc do roi!`);
 
       await sendDiscord(null, [{
@@ -81,6 +83,25 @@ async function checkinSession(session) {
       }]);
 
       return true; // Vẫn tính là thành công
+    }
+
+    // Chưa đến ngày/giờ check-in
+    if (msgText.includes("chưa") && (msgText.includes("ngày") || msgText.includes("giờ") || msgText.includes("thời gian") || msgText.includes("đến") || msgText.includes("tới"))) {
+      console.log(`   [INFO] Chua toi thoi gian check-in: ${json.message?.text}`);
+
+      await sendDiscord(null, [{
+        title: "Chưa tới giờ check-in",
+        color: 0xf39c12, // Màu vàng cam
+        fields: [
+          { name: "Lop", value: session.class_name, inline: true },
+          { name: "Gio hoc", value: timeStr, inline: true },
+          { name: "Bai", value: session.session_chapter, inline: false },
+          { name: "Ghi chu", value: json.message.text, inline: false },
+        ],
+        timestamp: new Date().toISOString(),
+      }]);
+
+      return false; // Cố tình return false để có thể thử lại sau nếu logic cho phép, nhưng ko báo lỗi đỏ
     }
 
     // Lỗi khác
