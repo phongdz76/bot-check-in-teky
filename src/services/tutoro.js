@@ -181,10 +181,15 @@ export async function getCheckinStatus(sessionId) {
 export async function getEvaluationStudents(sessionId) {
   try {
     const json = await callApi("GET", `/class_sessions/${sessionId}/evaluations`);
+    let allStudents = [];
     if (json.data?.list_evaluations?.length > 0) {
-      return json.data.list_evaluations[0].list_students || [];
+      for (const evalGroup of json.data.list_evaluations) {
+        if (evalGroup.list_students) {
+          allStudents = allStudents.concat(evalGroup.list_students);
+        }
+      }
     }
-    return [];
+    return allStudents;
   } catch (err) {
     console.error(`[API] Loi lay danh sach hs de danh gia:`, err.message);
     return [];
