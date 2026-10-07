@@ -342,8 +342,19 @@ function renderWeeklyCalendarPage(weekData, todaySessions) {
 function renderSessionDetailPage(session, checkinStatus, evalMode) {
   const formatMin = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   const timeStr = `${formatMin(session.datetime.start_time)} - ${formatMin(session.datetime.end_time)}`;
+  
   const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  let sDate = now;
+  if (session.datetime?.day && session.datetime?.month && session.datetime?.year) {
+    sDate = new Date(session.datetime.year, session.datetime.month - 1, session.datetime.day);
+  } else {
+    sDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  const startMs = sDate.getTime() + session.datetime.start_time * 60000;
+  const endMs = sDate.getTime() + session.datetime.end_time * 60000;
+  const checkinWindowStartMs = startMs - 15 * 60000;
+  const nowMs = now.getTime();
 
   const checkinWindowStart = session.datetime.start_time - 15;
   let status, statusLabel, statusColor, statusIcon;
@@ -353,12 +364,12 @@ function renderSessionDetailPage(session, checkinStatus, evalMode) {
     statusLabel = "Đã Check-in";
     statusColor = "#10b981"; // Emerald green
     statusIcon = "✅";
-  } else if (currentMinutes < checkinWindowStart) {
+  } else if (nowMs < checkinWindowStartMs) {
     status = "waiting";
     statusLabel = "Chờ Check-in";
     statusColor = "#f59e0b"; // Amber
     statusIcon = "⏳";
-  } else if (currentMinutes >= checkinWindowStart && currentMinutes <= session.datetime.start_time + 30) {
+  } else if (nowMs >= checkinWindowStartMs && nowMs <= startMs + 30 * 60000) {
     status = "ready";
     statusLabel = "Sẵn sàng Check-in";
     statusColor = "#3b82f6"; // Blue
@@ -372,7 +383,7 @@ function renderSessionDetailPage(session, checkinStatus, evalMode) {
 
   const failedInfo = failedCheckins.get(String(session.session_id));
   const canRetry = failedInfo ? (Date.now() - failedInfo.failedAt >= 5 * 60 * 1000) : false;
-  const evalReady = currentMinutes >= session.datetime.end_time + 5;
+  const evalReady = nowMs >= endMs + 5 * 60000;
 
   let checkinTimeInfo = "";
   if (checkinStatus && checkinStatus.checkin_datetime) {
@@ -380,7 +391,7 @@ function renderSessionDetailPage(session, checkinStatus, evalMode) {
     checkinTimeInfo = `${String(cDate.getHours()).padStart(2, "0")}:${String(cDate.getMinutes()).padStart(2, "0")}`;
   }
 
-  const waitMinutes = checkinWindowStart - currentMinutes;
+  const waitMinutes = Math.floor((checkinWindowStartMs - nowMs) / 60000);
   const modeNames = { 0: "Không đánh giá", 1: "Bình thường", 2: "Tích cực" };
   const modeName = modeNames[evalMode] || "Bình thường";
 
@@ -630,14 +641,13 @@ function renderSessionDetailPage(session, checkinStatus, evalMode) {
 
     ${status === "waiting" ? `
     setInterval(() => {
-      const targetMin = ${checkinWindowStart};
-      const now = new Date();
-      const left = (targetMin - (now.getHours() * 60 + now.getMinutes())) * 60 - now.getSeconds();
-      if (left <= 0) location.reload();
+      const targetMs = ${checkinWindowStartMs};
+      const leftSec = Math.floor((targetMs - Date.now()) / 1000);
+      if (leftSec <= 0) location.reload();
       else {
-        const h = Math.floor(left / 3600);
-        const m = Math.floor((left % 3600) / 60);
-        const s = left % 60;
+        const h = Math.floor(leftSec / 3600);
+        const m = Math.floor((leftSec % 3600) / 60);
+        const s = leftSec % 60;
         const el = document.getElementById('countdown');
         if(el) el.textContent = (h > 0 ? h + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
       }
